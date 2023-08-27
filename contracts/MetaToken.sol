@@ -1,17 +1,47 @@
+//MetaToken.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
+import "erc721a/contracts/ERC721A.sol";
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MetaToken is ERC20, Ownable {
-    constructor() ERC20("MetaToken", "MTA") {}
+contract MetaToken is ERC721A{
+    address public owner;
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+     // Base URL for the NFTs
+    string public baseUrl = "https://gateway.pinata.cloud/ipfs/QmX7E4BYdnjweCdRARsWccz7SRU1q4szi994r4h9AqRrKk/?_gl=1*n528oq*_ga*MjAxNTczMzI0Mi4xNjkyNzkwNjQ0*_ga_5RMPXG14TE*MTY5Mjk5NzA2Ni42LjEuMTY5Mjk5NzE0Ny42MC4wLjA.";
+
+    // Prompt descriptions
+    
+    string public description ="An impressionist oil painting of sunflower in a purple vase";
+
+    constructor() ERC721A("MetaToken", "MTA") {
+        owner = msg.sender;
+        
     }
 
-    function decimals() public pure override returns (uint8) {
-		return 0;
-	}
+    
+    // Modifier that only allows the owner to execute a function
+    modifier ownerAllowed() {
+        require(msg.sender == owner, "Only owner can perform this action!");
+        _;
+    }
+    // Function to mint NFTs which only the owner can perform
+    function mint(uint256 quantity) external payable ownerAllowed() {
+        require(quantity <= 5, "Only 5 NFTs can be minted at a time");
+            
+        _mint(msg.sender, quantity);
+    }
+
+    // Override the baseURI function to return the base URL for the NFTs
+    function _baseURI() internal view override returns (string memory) {
+        return baseUrl;
+    }
+
+   
+    // Return the prompt descriptions
+    function promptDescription() external view returns (string memory) {
+        return description;
+    }
+
+
 }
